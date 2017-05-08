@@ -1,0 +1,467 @@
+/*
+Game of Tic Tac Toe.
+Game can expand the game board from 3x3 to something larger like 10x10.  Also win criteria is configurable too so that it can increase from 3 in a row to 10 in a row. 
+Game state can be saved and loaded. The user can reload a saved game and start playing from the saved state.
+*/
+
+
+import java.io.*;
+import java.util.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+
+/*
+This game enables the user to set the Tic Tac Toe board size dynamically at the run time.
+The player 1 enters the co-ordinates of the board and can only enter "X"s
+Player 2 only enters "O"s and the position is dynamically generated.
+The code checks for horizontal , vertical and Diagonal pattern at every step.
+The user has ability to save the game to a txt file as well as retrieve the saved game later on.It should be however remembered
+that while retrieving the saved game, the user should know the board size of the saved game.
+*/
+
+public class TicTacToe {
+
+    static char[][] abc ;//tic tac toe Board
+    static char[][] xyz; //this is used while loading the saved game
+
+    //Code to Initialize the Board with empty spaces
+    public void ArrayInitialize(int a) {
+        abc = new char[a][a];
+        for (int i = 0; i <= (a-1); i++) {
+            for (int j = 0; j <= (a-1); j++) {
+                abc[i][j] = 32;
+            }
+        }
+    }
+
+    //Code to draw the board with given size and "X"s and "O"s
+    public void DrawArray(int a) {
+        for (int i = 0; i <= (a-1); i++) {
+            for (int j = 0; j <= (a-1); j++) {
+                if (j != (a-1))
+                    System.out.print(abc[i][j] + " | ");
+                else
+                    System.out.print(abc[i][j]);
+            }
+            System.out.println("");
+            if (i != (a-1))
+                System.out.println("---------------------------------------");
+            else
+                System.out.println("");
+            }
+        System.out.println("-----------------------------------------------------------------------");
+    }
+
+    //Code to enter "X" by Player 1
+    public void player1(int a, int b) {
+        if(abc[a][b] == 32)
+        {
+            abc[a][b] = 88;
+        }
+        else
+        {
+            System.out.println("this cell is already occupied,please select some other cell.");
+            input();
+        }
+    }
+
+    //This code automatically enters "O"s on the board
+    public void player2(int size) {
+        Random generator = new Random();
+        int i = generator.nextInt(size);
+        int j = generator.nextInt(size);
+
+        //System.out.println(i +" , "+ j);
+
+        if (abc[i][j] != 88 && abc[i][j] != 79)
+            abc[i][j] = 79;
+        else {
+            player2(size);
+        }
+    }
+
+    //This code asks the position to enter "X"s
+    public void input() {
+        System.out.println("please enter the position");
+        Scanner scanner1 = new Scanner(System.in);
+
+        int i = scanner1.nextInt();
+        if (scanner1.hasNextInt())
+        {
+            int j = scanner1.nextInt();
+            player1(i, j);
+        }
+    }
+
+    //This code checks whether the board has spaces
+    public boolean ArrayHasSpace(int a) {
+        for (int i = 0; i <= (a-1); i++) {
+            for (int j = 0; j <= (a-1); j++) {
+                if (abc[i][j] == 32) {
+                    return true;
+                }
+
+            }
+        }
+        return false;
+    }
+
+//----------------------------------------------------------------------
+
+    //This player checks whether we have "X" pattern along the row
+    public boolean RowCriteriaPlayer1(int a)
+    {
+        a--;
+        ArrayList<Character> arraylist1 = new ArrayList<Character>();
+        for (int l = 0; l <= a; l++)
+        {
+            for (int i = 0; i <= a; i++)
+            {
+                arraylist1.add(abc[l][i]);
+            }
+            char result = 88;
+            int k = 0;int j = 0;
+            while ((j <= a) && (result == arraylist1.get(j))) {
+                k++;
+                j++;
+            }
+            arraylist1.clear();
+            if (k == (a+1))
+                return true;
+
+        }return false;
+    }
+
+    //This player checks whether we have "X" pattern along the forward diagonal - "\"
+     public boolean ForwardDiagonalCriteriaPlayer1(int a )
+    {
+        a--;
+        ArrayList<Character> arraylist2 = new ArrayList<Character>();
+
+        for (int i = 0; i <= a; i++)
+        {
+            arraylist2.add(abc[i][i]);
+        }
+        char result = 88;
+        int k = 0;int j = 0;
+        while ((j <= a) && (result == arraylist2.get(j))) {
+            k++;
+            j++;
+        }
+        arraylist2.clear();
+        if (k ==(a+1))
+            return true;
+        else
+            return false;
+    }
+
+    //This player checks whether we have "X" pattern along the Column
+    public boolean ColumnCriteriaPlayer1(int a)
+    {
+        a--;
+        ArrayList<Character> arraylist3 = new ArrayList<Character>();
+        for (int l = 0; l <= a; l++)
+        {
+            for (int i = 0; i <= a; i++)
+            {
+                arraylist3.add(abc[i][l]);
+            }
+            char result = 88;
+            int k = 0;int j = 0;
+            while ((j <= a) && (result == arraylist3.get(j))) {
+                k++;
+                j++;
+            }
+            arraylist3.clear();
+            if (k == (a+1))
+                return true;
+
+        }return false;
+    }
+
+    //This player checks whether we have "X" pattern along the backward diagonal - "/"
+    public boolean BackwardDiagonalCriteriaPlayer1(int a)
+    {
+        a--;
+        ArrayList<Character> arraylist4 = new ArrayList<Character>();
+
+        for (int i = 0; i <= a; i++)
+        {
+            arraylist4.add(abc[i][a-i]);
+        }
+
+        char result = 88;
+        int k = 0;int j = 0;
+
+        while ((j <= a) && (result == arraylist4.get(j)))
+        {
+            k++;
+            j++;
+        }
+        arraylist4.clear();
+        if (k == a+1)
+            return true;
+        else
+            return false;
+    }
+
+//---------------------------------------------------------------------
+
+    //This player checks whether we have "O" pattern along the row
+    public boolean RowCriteriaPlayer2(int a)
+    {
+        a--;
+        ArrayList<Character> arraylist1 = new ArrayList<Character>();
+        for (int l = 0; l <= a; l++)
+        {
+            for (int i = 0; i <= a; i++)
+            {
+                arraylist1.add(abc[l][i]);
+            }
+            char result = 79;
+            int k = 0;int j = 0;
+            while ((j <= a) && (result == arraylist1.get(j))) {
+                k++;
+                j++;
+            }
+            arraylist1.clear();
+            if (k == (a+1))
+                return true;
+
+        }return false;
+    }
+
+    //This player checks whether we have "O" pattern along the forward diagonal - "\"
+    public boolean ForwardDiagonalCriteriaPlayer2(int a)
+    {
+        a--;
+        ArrayList<Character> arraylist2 = new ArrayList<Character>();
+
+        for (int i = 0; i <= a; i++)
+        {
+            arraylist2.add(abc[i][i]);
+        }
+        char result = 88;
+        int k = 0;int j = 0;
+        while ((j <= a) && (result == arraylist2.get(j))) {
+            k++;
+            j++;
+        }
+        arraylist2.clear();
+        if (k == (a+1))
+            return true;
+        else
+            return false;
+    }
+
+    //This player checks whether we have "O" pattern along the column
+    public boolean ColumnCriteriaPlayer2(int a)
+    {
+        a--;
+        ArrayList<Character> arraylist3 = new ArrayList<Character>();
+        for (int l = 0; l <= a; l++)
+        {
+            for (int i = 0; i <= a; i++)
+            {
+                arraylist3.add(abc[i][l]);
+            }
+            char result = 79;
+            int k = 0;int j = 0;
+            while ((j <= a) && (result == arraylist3.get(j))) {
+                k++;
+                j++;
+            }
+            arraylist3.clear();
+            if (k == (a+1))
+                return true;
+
+        }return false;
+    }
+
+    //This player checks whether we have "O" pattern along the backward diagonal - "/"
+    public boolean BackwardDiagonalCriteriaPlayer2(int a)
+    {
+        a--;
+        ArrayList<Character> arraylist4 = new ArrayList<Character>();
+
+        for (int i = 0; i <= a; i++)
+        {
+            arraylist4.add(abc[i][a-i]);
+        }
+
+        char result = 79;
+        int k = 0;int j = 0;
+
+        while ((j <= a) && (result == arraylist4.get(j)))
+        {
+            k++;
+            j++;
+        }
+        arraylist4.clear();
+        if (k == a+1)
+            return true;
+        else
+            return false;
+    }
+
+    //This code asks the user for the size of board
+    public int ArraySize()
+    {
+        System.out.println("Enter the size of the TicTacToe Board");
+        Scanner scanner5 = new Scanner(System.in);
+        int i = scanner5.nextInt();
+        return i;
+    }
+
+    //This code is used to save the present state of the game in the form of an arraylist
+    public void WriteIntoFile(int a)
+    {
+        ArrayList<Integer> arraylist6= new ArrayList<Integer>();
+        BufferedWriter bw = null;
+        try {
+
+            for(int i = 0; i <= (a-1); i++)
+            {
+                for(int j = 0; j <= (a-1); j++)
+                {
+                   arraylist6.add(Integer.valueOf((abc[i][j])));
+                }
+            }
+
+            File file = new File("G:/Aditya_Files/Desktop/TicTacToe/1.txt");
+
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+
+            FileWriter fw = new FileWriter(file);
+            bw = new BufferedWriter(fw);
+            bw.write(String.valueOf(arraylist6));
+            System.out.println("The Game is Saved Successfully");
+
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+        finally
+        {
+            try{
+                if(bw!=null)
+                    bw.close();
+            }catch(Exception ex){
+                System.out.println("Error in saving the game    :    "+ex);
+            }
+        }
+    }
+
+    //This code is used to retrieve the arraylist from file -- loading the game
+    public void ReadFromFile(int a) throws IOException {
+        char[] temp = new char[a];
+        int length = (int)Math.sqrt(a);
+        ArrayList<String> list = new ArrayList<String>();
+        BufferedReader reader = new BufferedReader(new FileReader("G:/Aditya_Files/Desktop/TicTacToe/1.txt"));
+        String line;
+        while((line = reader.readLine()) != null) {
+            list.add(line);
+        }
+        reader.close();
+
+        Scanner scan = new Scanner(list.get(0));
+        scan.useDelimiter(",");
+        int i = 0;
+        while(scan.hasNext()){
+            String str,str1;
+            str = scan.next().replace('[',' ').replace(']',' ');
+            str1 = str.replaceAll("\\s","");
+            temp[i] = (char)Integer.parseInt(str1);
+            i++;
+        }
+        scan.close();
+        int z= 0;
+        for(int x = 0 ; x <=(length-1) ; x++) {
+            for (int y = 0; y <=(length-1); y++) {
+                abc[x][y] = temp[z];
+                z++;
+            }
+        }
+
+    }
+
+    //this is used to ask the user whether he/she wants to save the game after every 3 turns
+    public boolean SaveGame()
+    {
+        System.out.println("Do you want to save the game ???  ");
+        System.out.println("NO - 0");
+        System.out.println("YES - 1");
+
+        Scanner scan7 = new Scanner(System.in);
+        int i = scan7.nextInt();
+
+        if(i==1)
+        {return true;}
+        else
+        {return false;}
+    }
+
+    //this is used to ask the user whether he/she wants to retrieve the saved game
+    public boolean RetrieveSaved()
+    {
+        System.out.println("Do you want to retrieve the saved game ???  ");
+        System.out.println("NO - 0");
+        System.out.println("YES - 1");
+
+        Scanner scanner71 = new Scanner(System.in);
+        int i = scanner71.nextInt();
+
+        if(i==1)
+        {return true;}
+        else
+        {return false;}
+    }
+
+    public static void main(String[] args)throws IOException
+    {
+        TicTacToe TTT = new TicTacToe();
+        int size = TTT.ArraySize();
+        TTT.ArrayInitialize(size);//initialize all board columns and rows with spaces
+
+        if(TTT.RetrieveSaved()==true)
+        {
+            TTT.ReadFromFile(size*size);
+            TTT.DrawArray(size);
+        }
+
+        int i = 0;
+        while(TTT.ArrayHasSpace(size) == true)//if the board has space, then continue
+         {
+             TTT.input();
+             TTT.DrawArray(size);
+             TTT.player2(size);
+             TTT.DrawArray(size);
+
+             // this checks whether there is a pattern match for "X" along the row, column and diagonals
+             if(TTT.BackwardDiagonalCriteriaPlayer1(size)==true || TTT.ForwardDiagonalCriteriaPlayer1(size)==true || TTT.ColumnCriteriaPlayer1(size)==true || TTT.RowCriteriaPlayer1(size)==true)
+             {
+                 System.out.println("player 1 has won !!!");//If pattern matches, player 1 wins
+                 break;
+             }
+             else// this checks whether there is a pattern match for "O" along the row, column and diagonals
+             if(TTT.BackwardDiagonalCriteriaPlayer2(size)==true || TTT.ForwardDiagonalCriteriaPlayer2(size)==true || TTT.ColumnCriteriaPlayer2(size)==true || TTT.RowCriteriaPlayer2(size)==true)
+             {
+                 System.out.println("player 2 has won !!!");//If pattern matches, player 0 wins
+                 break;
+             }
+
+             //This is used to ask the user to save a game every 3 turns
+             if(i%3 == 0)
+             {
+                 if(TTT.SaveGame() == true) {
+                     TTT.WriteIntoFile(size);
+                     break;
+                 }
+             }
+             i++;
+         }
+    }
+}
